@@ -1,0 +1,8 @@
+[flake8]
+max-line-length=88
+exclude=ignore
+per-file-ignores =
+    # The test file uses literal tab spaces to represent Go Struts
+    # W191 indentation contains tabs
+    # E101 indentation contains mixed spaces and tabs
+    test_golang_gen.py:E101 W191
