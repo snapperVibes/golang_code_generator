@@ -3,9 +3,6 @@ from typing import List, Sequence, Optional, Union, Tuple, Callable
 
 from . import go_token as tok
 
-# Backslashes aren't allowed in fstrings
-_newline_tab = "\n\t"
-
 
 class Element:
     """ Represents a section of the Go file"""
@@ -93,6 +90,7 @@ def to_field(seq: InitToField) -> Field:
 @dataclass
 class GoFile:
     filename: str
+    package: str
     sections: List[Element] = field(default_factory=list)
 
     generated_code_message = "GENERATED CODE"
@@ -158,7 +156,7 @@ class Struct(Element):
     def __str__(self):
         fields = ""
         if self.fields:
-            fields = _newline_tab + _newline_tab.join(str(f) for f in self.fields)
+            fields = "\n\t" + "\n\t".join(str(f) for f in self.fields)
         return f"type {self.name} struct {{{fields}\n}}"
 
 
@@ -172,5 +170,28 @@ def fields_to_struct(name: str, fields: Sequence[InitToField]) -> Struct:
     return struct
 
 
-def class_to_struct():
-    pass
+@dataclass
+class ImportStatement(Element):
+    packages: Union[str, Sequence[str]]
+
+    def __post_init__(self):
+        if isinstance(self.packages, str):
+            self.packages = [self.packages]
+
+    def __iter__(self):
+        for p in self.packages:
+            yield p
+
+    def __len__(self):
+        return len([package for package in self])
+
+    def __str__(self):
+        if len(self) == 1:
+            return f"import {self.packages[0]}"
+        fields = ""
+        packages = "\n\t" + "\n\t".join(f'"{p}"' for p in self.packages)
+        return f"import ({packages}\n)"
+
+
+def to_import_statement(packages: Union[str, Sequence[str]]) -> ImportStatement:
+    return ImportStatement(packages)

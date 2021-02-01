@@ -8,7 +8,41 @@ from golang_code_gen.go_file import (
     Field,
     fields_to_struct,
     Comment,
+    ImportStatement,
+    to_import_statement,
 )
+
+
+class TestImport:
+    def test_constructor(self):
+        _import = ImportStatement("fmt")
+        assert str(_import) == "import fmt"
+
+    def test_multi_constructor(self):
+        _import = ImportStatement(["fmt", "time"])
+        assert (
+            str(_import)
+            == """\
+import (
+	"fmt"
+	"time"
+)"""
+        )
+
+    def test_to_import_statement(self):
+        _import = to_import_statement("fmt")
+        assert str(_import) == "import fmt"
+
+    def test_multi_to_import_statement(self):
+        _import = to_import_statement(["fmt", "time"])
+        assert (
+            str(_import)
+            == """\
+import (
+	"fmt"
+	"time"
+)"""
+        )
 
 
 class TestComment:

@@ -6,6 +6,8 @@ from .go_file import (
     to_field,
     Struct,
     fields_to_struct,
+    ImportStatement,
+    to_import_statement,
 )
 
 __all__ = [
@@ -16,4 +18,6 @@ __all__ = [
     "to_field",
     "Struct",
     "fields_to_struct",
+    "ImportStatement",
+    "to_import_statement",
 ]
