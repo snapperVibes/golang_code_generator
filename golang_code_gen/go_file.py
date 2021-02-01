@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
-from typing import List, Sequence, Optional, Union, Tuple
+from typing import List, Sequence, Optional, Union, Tuple, Callable
 
-import go_token as tok
+from . import go_token as tok
 
 # Backslashes aren't allowed in fstrings
 _newline_tab = "\n\t"
@@ -59,8 +59,12 @@ class Field(Element):
 
     def __iter__(self):
         yield self.name
-        for attr in (self.name, self.type, self.annotation):
-            yield attr
+        yield self.type
+        if self.annotation:
+            yield self.annotation
+
+    def __len__(self):
+        return len([attr for attr in self])
 
     # Todo: Clean up significantly
     def __str__(self):
@@ -75,7 +79,7 @@ class Field(Element):
 InitToField = Union[Field, Union[Tuple[str, str]], Tuple[str, str, Optional[str]]]
 
 
-def field_from_sequence(seq: InitToField) -> Field:
+def to_field(seq: InitToField) -> Field:
     """Field factory-function. The sequence's
     first position represents the field's name,
     second position represents the field's type,
@@ -96,19 +100,35 @@ class GoFile:
     def add_element(self, element):
         self.sections.append(element)
 
-    # def add_comment(self, comment):
-    #     if isinstance(comment, Comment):
-    #         self.sections.append(comment)
-    #     else:
-    #         self.sections.append(to_line_comment(comment))
+
+def _to_line_comment(text):
+    lines = text.splitlines()
+    return "\n".join([f"{tok.COMMENT} {line}" for line in lines])
+
+
+def _to_block_comment(text):
+    lines = text.splitlines()
+    return "\n".join([tok.LCOMMENT, *lines, tok.RCOMMENT])
 
 
 @dataclass
 class Comment(Element):
-    text: str
+    _text: str
+    _builder: Callable[[str], str] = _to_line_comment
+
+    def __post_init__(self):
+        self.text = self._builder(self._text)
 
     def __str__(self):
         return self.text
+
+
+def to_line_comment(text: str) -> Comment:
+    return Comment(text, _to_line_comment)
+
+
+def to_block_comment(text: str) -> Comment:
+    return Comment(text, _to_block_comment)
 
 
 @dataclass()
@@ -142,34 +162,15 @@ class Struct(Element):
         return f"type {self.name} struct {{{fields}\n}}"
 
 
-def struct_from_fields(name: str, fields: Sequence[InitToField]) -> Struct:
+def fields_to_struct(name: str, fields: Sequence[InitToField]) -> Struct:
+    """Creates a new struct by copying the name, type, and annotation values from a
+    sequence of fields"""
     struct = Struct(name)
     for f in fields:
-        if isinstance(f, Field):
-            struct.fields.append(f)
-        else:
-            struct.fields.append(Field(*f))
+        struct.fields.append(Field(*f))
     struct.format_fields()
     return struct
 
 
-def to_line_comment(text: str) -> Comment:
-    lines = text.splitlines()
-    return Comment("\n".join([f"{tok.COMMENT} {line}" for line in lines]))
-
-
-def to_block_comment(text: str) -> Comment:
-    lines = text.splitlines()
-    return Comment("\n".join([tok.LCOMMENT, *lines, tok.RCOMMENT]))
-
-
-def dict_to_struct():
-    pass
-
-
 def class_to_struct():
-    pass
-
-
-def obj_to_struct():
     pass
