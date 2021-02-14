@@ -103,8 +103,12 @@ class GoFile:
         self.sections.append(element)
 
     def write(self):
-        with self._writer(self.filename):
-            pass
+        with self._writer(self.filename) as w:
+            w.write(f"package {self.package}\n\n")
+            for section in self.sections:
+                w.write(f"{to_line_comment(self.generated_code_message)}\n")
+                w.write(str(section))
+                w.write("\n\n")
 
 
 def _to_line_comment(text):

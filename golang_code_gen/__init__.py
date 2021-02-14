@@ -1,4 +1,5 @@
 from .go_file import (
+    GoFile,
     Comment,
     to_block_comment,
     to_line_comment,
@@ -13,6 +14,7 @@ from .go_file import (
 )
 
 __all__ = [
+    "GoFile",
     "Comment",
     "to_block_comment",
     "to_line_comment",
