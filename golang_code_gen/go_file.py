@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import List, Sequence, Optional, Union, Tuple, Callable
+from functools import partial
+from typing import List, Sequence, Optional, Union, Tuple, Callable, ContextManager
 
 from . import go_token as tok
 
@@ -87,21 +88,30 @@ def to_field(seq: InitToField) -> Field:
     return Field(*seq)
 
 
+_file_writer = partial(open, mode="w")
+
 @dataclass
 class GoFile:
     filename: str
     package: str
     sections: List[Element] = field(default_factory=list)
+    _writer: Callable = _file_writer
 
     generated_code_message = "GENERATED CODE"
 
     def add_element(self, element):
         self.sections.append(element)
 
+    def write(self):
+        with self._writer(self.filename):
+            pass
+
 
 def _to_line_comment(text):
     lines = text.splitlines()
     return "\n".join([f"{tok.COMMENT} {line}" for line in lines])
+
+_to_line_comment.__repr__ = "_to_line_comment"
 
 
 def _to_block_comment(text):
@@ -188,10 +198,18 @@ class ImportStatement(Element):
     def __str__(self):
         if len(self) == 1:
             return f"import {self.packages[0]}"
-        fields = ""
         packages = "\n\t" + "\n\t".join(f'"{p}"' for p in self.packages)
         return f"import ({packages}\n)"
 
 
 def to_import_statement(packages: Union[str, Sequence[str]]) -> ImportStatement:
     return ImportStatement(packages)
+
+def snake_case_to_pascal(string: str) -> str:
+    """Returns a copy of a snake_case string converted to PascalCase"""
+    return "".join(s.title() for s in string.split("_"))
+
+def snake_case_to_camel(string: str) -> str:
+    """Returns a copy of a snake_case string converted to camelCase"""
+    pascal = snake_case_to_pascal(string)
+    return pascal[0].lower() + pascal[1:]

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+# from tempfile import NamedTemporaryFile
 
 import pytest
 from golang_code_gen.go_file import (
@@ -10,6 +11,8 @@ from golang_code_gen.go_file import (
     Comment,
     ImportStatement,
     to_import_statement,
+    snake_case_to_camel,
+    snake_case_to_pascal
 )
 
 
@@ -168,6 +171,17 @@ type Oof struct {
 }"""
         )
 
+
+class TestGoFile:
+    def test(self):
+        return False
+
+
+def test_snake_case():
+    assert snake_case_to_pascal("testing_is_fun") == "TestingIsFun"
+    assert snake_case_to_camel("testing_is_fun") == "testingIsFun"
+    assert snake_case_to_camel("rAndOM_CAPitals") == "randomCapitals"
+    assert snake_case_to_camel("x") == "x"
 
 if __name__ == "__main__":
     pytest.main()

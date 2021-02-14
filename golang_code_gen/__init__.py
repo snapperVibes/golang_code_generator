@@ -8,6 +8,8 @@ from .go_file import (
     fields_to_struct,
     ImportStatement,
     to_import_statement,
+    snake_case_to_camel,
+    snake_case_to_pascal,
 )
 
 __all__ = [
@@ -20,4 +22,7 @@ __all__ = [
     "fields_to_struct",
     "ImportStatement",
     "to_import_statement",
+    "snake_case_to_camel",
+    "snake_case_to_pascal"
+
 ]

@@ -45,3 +45,4 @@ pythonenv*
 .idea
 
 ignore
+/docs/build/
